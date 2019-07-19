@@ -8,10 +8,7 @@ const knex = require('knex')
 
 const knexInstance = knex({
   client: 'pg',
-  connection: {
-    host: '127.0.0.1',
-    database: 'traffic',
-  }
+connection: process.env.DATABSE_URL
 })
 
 const app = express()
@@ -29,7 +26,32 @@ app.get('/incidents', (req, res) => {
     .then(result => {
       res.send(result)
     })
+})
 
+app.get('/incidents-geo', (req, res) => {
+  const incidents = knexInstance.from('incidents').select('*')
+  .then(results => {
+    let features = []
+    for (let data of results) {
+      let { location } = data
+      location = location.slice(1, location.length - 2)
+      let lon, lat = 0
+      location = location.split(',')
+      lat = parseFloat(location[0].trim())
+      lon = parseFloat(location[1].trim())
+      let temp = { lat: lat, lng: lon} 
+      features.push(temp)
+    }
+    let geoJson = {    
+      positions: features,
+      options: {   
+        radius: 20,   
+        opacity: 0.6,
+
+    }
+  }
+    res.send(geoJson)
+  })
 })
 
 app.use(function errorHandler(error, req, res, next) {
