@@ -8,7 +8,7 @@ const knex = require('knex')
 
 const knexInstance = knex({
   client: 'pg',
-connection: process.env.DATABSE_URL
+connection: process.env.DATABASE_URL
 })
 
 const app = express()
