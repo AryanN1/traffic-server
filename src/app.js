@@ -1,4 +1,5 @@
-require ('dotenv').config()
+const dotenv = require('dotenv'); 
+dotenv.config();
 const express = require('express')
 const morgan = require('morgan')
 const cors = require('cors')
@@ -10,6 +11,7 @@ const knexInstance = knex({
   client: 'pg',
 connection: process.env.DATABASE_URL
 })
+//console.log(process.env.DATABASE_URL);
 
 const app = express()
 
