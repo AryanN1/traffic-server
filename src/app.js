@@ -6,6 +6,7 @@ const cors = require('cors')
 const helmet = require('helmet')
 const { NODE_ENV } = require('./config')
 const knex = require('knex')
+const bodyParser = require('body-parser')
 
 const knexInstance = knex({
   client: 'pg',
@@ -22,6 +23,8 @@ const morganOption = (NODE_ENV === 'production')
 app.use(morgan(morganOption))
 app.use(cors())
 app.use(helmet())
+app.use(bodyParser.json())
+// GET Method \\
 
 app.get('/incidents', (req, res) => {
   const incidents = knexInstance.from('incidents').select('*')
@@ -44,6 +47,7 @@ app.get('/incidents-geo', (req, res) => {
       let temp = { lat: lat, lng: lon} 
       features.push(temp)
     }
+
     let geoJson = {    
       positions: features,
       options: {   
@@ -55,6 +59,17 @@ app.get('/incidents-geo', (req, res) => {
     res.send(geoJson)
   })
 })
+
+// POST Method \\
+
+app.post('/incidents', (req, res) => {
+  knexInstance('incidents').insert({ location: `(${req.body.location.lat}, ${req.body.location.lng})`})
+  .then((location) => {
+    res.json({ success: true, location});
+  })
+})
+
+// App.use \\
 
 app.use(function errorHandler(error, req, res, next) {
   let response
