@@ -12,7 +12,7 @@ const knexInstance = knex({
   client: 'pg',
 connection: process.env.DATABASE_URL
 })
-//console.log(process.env.DATABASE_URL);
+console.log(process.env.DATABASE_URL);
 
 const app = express()
 
@@ -63,7 +63,8 @@ app.get('/incidents-geo', (req, res) => {
 // POST Method \\
 
 app.post('/incidents', (req, res) => {
-  knexInstance('incidents').insert({ location: `(${req.body.location.lat}, ${req.body.location.lng})`})
+  console.log('Posting new Incident')
+  knexInstance('incidents').insert({location: `(${req.body.location.lat}, ${req.body.location.lng})`})
   .then((location) => {
     res.json({ success: true, location});
   })
