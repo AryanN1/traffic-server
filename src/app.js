@@ -7,6 +7,8 @@ const helmet = require('helmet')
 const { NODE_ENV } = require('./config')
 const knex = require('knex')
 const bodyParser = require('body-parser')
+var n = require('nonce')();
+console.log(n());
 
 const knexInstance = knex({
   client: 'pg',
@@ -64,7 +66,7 @@ app.get('/incidents-geo', (req, res) => {
 
 app.post('/incidents', (req, res) => {
   console.log('Posting new Incident')
-  knexInstance('incidents').insert({location: `(${req.body.location.lat}, ${req.body.location.lng})`})
+  knexInstance('incidents').insert({id: n(), location: `(${req.body.location.lat}, ${req.body.location.lng})`})
   .then((location) => {
     res.json({ success: true, location});
   })
