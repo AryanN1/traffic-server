@@ -7,14 +7,11 @@ const helmet = require('helmet')
 const { NODE_ENV } = require('./config')
 const knex = require('knex')
 const bodyParser = require('body-parser')
-var n = require('nonce')();
-console.log(n());
 
 const knexInstance = knex({
   client: 'pg',
 connection: process.env.DATABASE_URL
 })
-console.log(process.env.DATABASE_URL);
 
 const app = express()
 
@@ -26,17 +23,17 @@ app.use(morgan(morganOption))
 app.use(cors())
 app.use(helmet())
 app.use(bodyParser.json())
-// GET Method \\
 
+// GET Method \\
 app.get('/incidents', (req, res) => {
-  const incidents = knexInstance.from('incidents').select('*')
+  knexInstance.from('incidents').select('*')
     .then(result => {
       res.send(result)
     })
 })
 
 app.get('/incidents-geo', (req, res) => {
-  const incidents = knexInstance.from('incidents').select('*')
+  knexInstance.from('incidents').select('*')
   .then(results => {
     let features = []
     for (let data of results) {
@@ -55,25 +52,27 @@ app.get('/incidents-geo', (req, res) => {
       options: {   
         radius: 20,   
         opacity: 0.6,
-
+      }
     }
-  }
     res.send(geoJson)
   })
 })
 
 // POST Method \\
-
 app.post('/incidents', (req, res) => {
   console.log('Posting new Incident')
-  knexInstance('incidents').insert({id: n(), location: `(${req.body.location.lat}, ${req.body.location.lng})`})
+  knexInstance.from('incidents').select('id').orderBy('id', 'desc').limit(1)
+  .then((id) => {
+    console.log(id)  //[ { id: 2836 } ]
+    knexInstance('incidents').insert({id:id[0].id + 1, location: `(${req.body.location.lat}, ${req.body.location.lng})`})
   .then((location) => {
     res.json({ success: true, location});
   })
+  })
+  
 })
 
 // App.use \\
-
 app.use(function errorHandler(error, req, res, next) {
   let response
   if (NODE_ENV === 'production') {
